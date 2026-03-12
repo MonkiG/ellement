@@ -40,8 +40,15 @@ export default abstract class EllementComponent extends HTMLElement {
   state<T>(initial: T) {
     let value = initial;
 
-    const setState = (updater: (prev: T) => T) => {
-      value = updater(value);
+    const setState = (next: T | ((prev: T) => T)) => {
+      const newValue =
+        typeof next === "function"
+          ? (next as (prev: T) => T)(value)
+          : next;
+
+      if (Object.is(value, newValue)) return;
+
+      value = newValue;
       this.requestRender();
     };
 
