@@ -1,4 +1,4 @@
-import type { TemplateResult } from "../utils/types";
+import type { TemplateResult } from "../template/types";
 
 type PropType = StringConstructor | NumberConstructor | BooleanConstructor;
 
@@ -9,6 +9,8 @@ type EllementProp = {
 
 export default abstract class EllementComponent extends HTMLElement {
   protected root: HTMLElement | ShadowRoot;
+  private _renderScheduled = false;
+
   static props?: Record<string, EllementProp>;
   static styles?: TemplateResult;
 
@@ -21,12 +23,23 @@ export default abstract class EllementComponent extends HTMLElement {
     this._render();
   }
 
+  requestRender(){
+    if(this._renderScheduled) return;
+    
+    this._renderScheduled = true;
+
+    queueMicrotask(() => {
+      this._renderScheduled = false;
+      this._render();
+    })
+  }
+
   state<T>(initial: T) {
     let value = initial;
 
     const setState = (updater: (prev: T) => T) => {
       value = updater(value);
-      this._render();
+      this.requestRender();
     };
 
     return {
