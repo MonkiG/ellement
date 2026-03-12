@@ -1,5 +1,5 @@
-import html from "../utils/html";
-import EllementComponent from "./EllementComponent";
+import { html } from "../template";
+import EllementComponent from "../core/EllementComponent";
 
 export default class CounterElement extends EllementComponent {
   count = this.state(0);

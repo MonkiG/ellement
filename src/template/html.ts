@@ -1,6 +1,6 @@
 import type { TemplateResult } from "./types";
 
-export default function html(
+export function html(
   strings: TemplateStringsArray,
   ...values: unknown[]
 ): TemplateResult {

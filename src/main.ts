@@ -1,1 +1,1 @@
-import "./core/Counter.element";
+import "./examples/Counter.element";
