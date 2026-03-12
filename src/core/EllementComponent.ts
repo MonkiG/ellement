@@ -10,13 +10,16 @@ type EllementProp = {
 export default abstract class EllementComponent extends HTMLElement {
   protected root: HTMLElement | ShadowRoot;
   private _renderScheduled = false;
+  protected static useShadow = true;
+  static styles?: TemplateResult; //Todo! handle static styles with reactive styles
 
   static props?: Record<string, EllementProp>;
   static styles?: TemplateResult;
 
   constructor() {
     super();
-    this.root = this;
+    const ctor = this.constructor as typeof EllementComponent;
+    this.root = ctor.useShadow ? this.attachShadow({ mode: "open" }) : this;
   }
 
   connectedCallback() {
