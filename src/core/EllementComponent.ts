@@ -1,3 +1,4 @@
+import { htmlParser, isRenderObject } from "../template";
 import type { TemplateResult } from "../template/types";
 
 type PropType = StringConstructor | NumberConstructor | BooleanConstructor;
@@ -14,7 +15,6 @@ export default abstract class EllementComponent extends HTMLElement {
   static styles?: TemplateResult; //Todo! handle static styles with reactive styles
 
   static props?: Record<string, EllementProp>;
-  static styles?: TemplateResult;
 
   constructor() {
     super();
@@ -61,23 +61,27 @@ export default abstract class EllementComponent extends HTMLElement {
   }
 
   private _render(): void {
-    const tpl = this.render();
+    const result = this.render();
 
-    let html = "";
+    let html: TemplateResult;
+    let styles: TemplateResult | undefined;
 
-    tpl.strings.forEach((str, i) => {
-      html += str;
-      if (i < tpl.values.length) {
-        html += tpl.values[i];
-      }
-    });
+    if (isRenderObject(result)) {
+      html = result.html;
+      styles = result.styles;
+    } else {
+      html = result;
+    }
 
-    this.root.innerHTML = html;
-
-    this.events(); // registrar eventos
+    this.root.innerHTML = htmlParser(html, styles);
+    
+    this.events();
   }
 
   protected events(): void {}
 
-  abstract render(): TemplateResult;
+  abstract render(): TemplateResult | {
+    styles?: TemplateResult;
+    html: TemplateResult
+  };
 }
