@@ -48,24 +48,30 @@ export default class CounterElement extends EllementComponent {
         }
       `,
       html: html`
-        <button id="color">Change color to ${this.counterState.value.color === 'black' ? 'white' : 'black'}</button>
+        <button id="color">
+          Change color to
+          ${this.counterState.value.color === "black" ? "white" : "black"}
+        </button>
         <button id="dec">-</button>
         <span>${this.counterState.value.count}</span>
         <button id="inc">+</button>
-      `
-    }
+      `,
+    };
   }
 
   events() {
-    this.root.querySelector("#color")?.addEventListener("click", () => {
-      this.counterState.setState((v) => ({ ...v, color: v.color === 'black' ? 'white' : 'black' }));
+    this.on("click", "#color", () => {
+      this.counterState.setState((v) => ({
+        ...v,
+        color: v.color === "black" ? "white" : "black",
+      }));
     });
 
-    this.root.querySelector("#inc")?.addEventListener("click", () => {
+    this.on("click", "#inc", () => {
       this.counterState.setState((v) => ({ ...v, count: v.count + 1 }));
     });
 
-    this.root.querySelector("#dec")?.addEventListener("click", () => {
+    this.on("click", "#dec", () => {
       this.counterState.setState((v) => ({ ...v, count: v.count - 1 }));
     });
   }
