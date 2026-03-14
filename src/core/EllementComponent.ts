@@ -14,6 +14,8 @@ export default abstract class EllementComponent extends HTMLElement {
   protected static useShadow = true;
   static styles?: TemplateResult;
   private ellementCtor: typeof EllementComponent;
+  private _eventsInitialized = false;
+
   static props?: Record<string, EllementProp>;
 
   constructor() {
@@ -28,15 +30,14 @@ export default abstract class EllementComponent extends HTMLElement {
     this._render();
   }
 
-  requestRender(){
-    if(this._renderScheduled) return;
-    
+  requestRender() {
+    if (this._renderScheduled) return;
     this._renderScheduled = true;
 
     queueMicrotask(() => {
       this._renderScheduled = false;
       this._render();
-    })
+    });
   }
 
   state<T>(initial: T) {
@@ -44,9 +45,7 @@ export default abstract class EllementComponent extends HTMLElement {
 
     const setState = (next: T | ((prev: T) => T)) => {
       const newValue =
-        typeof next === "function"
-          ? (next as (prev: T) => T)(value)
-          : next;
+        typeof next === "function" ? (next as (prev: T) => T)(value) : next;
 
       if (Object.is(value, newValue)) return;
 
@@ -60,6 +59,30 @@ export default abstract class EllementComponent extends HTMLElement {
       },
       setState,
     };
+  }
+
+  protected on<K extends keyof HTMLElementEventMap>(
+    event: K,
+    selector: string,
+    handler: (
+      e: HTMLElementEventMap[K],
+      el: HTMLElement | EllementComponent,
+    ) => void,
+  ) {
+    this.root.addEventListener(event, (e) => {
+      const path = e.composedPath() as HTMLElement[];
+
+      for (const node of path) {
+        if (!(node instanceof HTMLElement)) continue;
+
+        if (node.matches(selector)) {
+          handler(e as HTMLElementEventMap[K], node);
+          return;
+        }
+
+        if (node === this.root) break;
+      }
+    });
   }
 
   private _render(): void {
@@ -85,8 +108,10 @@ export default abstract class EllementComponent extends HTMLElement {
 
   protected events(): void {}
 
-  abstract render(): TemplateResult | {
-    styles?: TemplateResult;
-    html: TemplateResult
-  };
+  abstract render():
+    | TemplateResult
+    | {
+        styles?: TemplateResult;
+        html: TemplateResult;
+      };
 }
