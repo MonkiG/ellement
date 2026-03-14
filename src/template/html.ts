@@ -11,7 +11,11 @@ export function html(
   };
 }
 
-export function htmlParser(html: TemplateResult, css?: TemplateResult): string {
+export function htmlParser(
+  html: TemplateResult,
+  staticCss?: TemplateResult,
+  reactiveCss?: TemplateResult,
+): string {
   let htmlString = "";
   let cssString = "";
 
@@ -22,18 +26,26 @@ export function htmlParser(html: TemplateResult, css?: TemplateResult): string {
     }
   });
 
-  if (css) {
-    css.strings.forEach((str, i) => {
+  if (staticCss) {
+    staticCss.strings.forEach((str, i) => {
       cssString += str;
-      if (i < css.values.length) {
-        cssString += normalizeValue(css.values[i]);
+      if (i < staticCss.values.length) {
+        cssString += normalizeValue(staticCss.values[i]);
+      }
+    });
+  }
+
+  if (reactiveCss) {
+    reactiveCss.strings.forEach((str, i) => {
+      cssString += str;
+      if (i < reactiveCss.values.length) {
+        cssString += normalizeValue(reactiveCss.values[i]);
       }
     });
   }
 
   return (cssString ? `<style>${cssString}</style>` : "") + htmlString;
 }
-
 
 export function isRenderObject(
   result: TemplateResult | {

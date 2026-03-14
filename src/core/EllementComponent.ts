@@ -12,14 +12,16 @@ export default abstract class EllementComponent extends HTMLElement {
   protected root: HTMLElement | ShadowRoot;
   private _renderScheduled = false;
   protected static useShadow = true;
-  static styles?: TemplateResult; //Todo! handle static styles with reactive styles
-
+  static styles?: TemplateResult;
+  private ellementCtor: typeof EllementComponent;
   static props?: Record<string, EllementProp>;
 
   constructor() {
     super();
-    const ctor = this.constructor as typeof EllementComponent;
-    this.root = ctor.useShadow ? this.attachShadow({ mode: "open" }) : this;
+    this.ellementCtor = this.constructor as typeof EllementComponent;
+    this.root = this.ellementCtor.useShadow
+      ? this.attachShadow({ mode: "open" })
+      : this;
   }
 
   connectedCallback() {
@@ -73,9 +75,12 @@ export default abstract class EllementComponent extends HTMLElement {
       html = result;
     }
 
-    this.root.innerHTML = htmlParser(html, styles);
-    
-    this.events();
+    this.root.innerHTML = htmlParser(html, this.ellementCtor.styles, styles);
+
+    if (!this._eventsInitialized) {
+      this._eventsInitialized = true;
+      this.events();
+    }
   }
 
   protected events(): void {}
