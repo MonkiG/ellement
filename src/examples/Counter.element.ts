@@ -4,36 +4,47 @@ import EllementComponent from "../core/EllementComponent";
 export default class CounterElement extends EllementComponent {
   counterState = this.state({
     count: 0,
-    color: 'black'
+    color: "black",
   });
 
+  static styles = css`
+    :host {
+      display: inline-block;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: sans-serif;
+      border: 1px solid #ccc;
+      transition:
+        background 0.2s,
+        color 0.2s;
+    }
+
+    button {
+      margin: 4px;
+      padding: 6px 10px;
+      border: 1px solid #888;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #f5f5f5;
+    }
+
+    span {
+      margin: 0 8px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  `;
+
   render() {
-    return { 
+    return {
       styles: css`
         :host {
-          display: inline-block;
-          padding: 16px;
-          border-radius: 8px;
-          font-family: sans-serif;
-          border: 1px solid #ccc;
-          background: ${this.counterState.value.color === 'black' ? 'black' : 'white'};
-          color: ${this.counterState.value.color === 'black' ? 'white' : 'black'};
-          transition: background 0.2s, color 0.2s;
-        }
-
-        button {
-          margin: 4px;
-          padding: 6px 10px;
-          border: 1px solid #888;
-          border-radius: 4px;
-          cursor: pointer;
-          background: #f5f5f5;
-        }
-
-        span {
-          margin: 0 8px;
-          font-weight: bold;
-          font-size: 18px;
+          background: ${this.counterState.value.color === "black"
+            ? "black"
+            : "white"};
+          color: ${this.counterState.value.color === "black"
+            ? "white"
+            : "black"};
         }
       `,
       html: html`
