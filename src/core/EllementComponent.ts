@@ -1,5 +1,6 @@
 import { htmlParser, isRenderObject } from "../template";
 import type { TemplateResult } from "../template/types";
+import EllementRuntime from "./runtime";
 
 type PropType = StringConstructor | NumberConstructor | BooleanConstructor;
 
@@ -15,6 +16,7 @@ export default abstract class EllementComponent extends HTMLElement {
   static styles?: TemplateResult;
   private ellementCtor: typeof EllementComponent;
   private _eventsInitialized = false;
+  _hooks: unknown[] = [];
 
   static props?: Record<string, EllementProp>;
 
@@ -27,7 +29,7 @@ export default abstract class EllementComponent extends HTMLElement {
   }
 
   connectedCallback() {
-    this._render();
+    this.#_render();
   }
 
   requestRender() {
@@ -36,29 +38,8 @@ export default abstract class EllementComponent extends HTMLElement {
 
     queueMicrotask(() => {
       this._renderScheduled = false;
-      this._render();
+      this.#_render();
     });
-  }
-
-  state<T>(initial: T) {
-    let value = initial;
-
-    const setState = (next: T | ((prev: T) => T)) => {
-      const newValue =
-        typeof next === "function" ? (next as (prev: T) => T)(value) : next;
-
-      if (Object.is(value, newValue)) return;
-
-      value = newValue;
-      this.requestRender();
-    };
-
-    return {
-      get value() {
-        return value;
-      },
-      setState,
-    };
   }
 
   protected on<K extends keyof HTMLElementEventMap>(
@@ -85,24 +66,30 @@ export default abstract class EllementComponent extends HTMLElement {
     });
   }
 
-  private _render(): void {
-    const result = this.render();
+  #_render(): void {
+    EllementRuntime.begin(this);
+    console.log("EllementRuntime Setted");
+    try {
+      const result = this.render();
 
-    let html: TemplateResult;
-    let styles: TemplateResult | undefined;
+      let html: TemplateResult;
+      let styles: TemplateResult | undefined;
 
-    if (isRenderObject(result)) {
-      html = result.html;
-      styles = result.styles;
-    } else {
-      html = result;
-    }
+      if (isRenderObject(result)) {
+        html = result.html;
+        styles = result.styles;
+      } else {
+        html = result;
+      }
 
-    this.root.innerHTML = htmlParser(html, this.ellementCtor.styles, styles);
+      this.root.innerHTML = htmlParser(html, this.ellementCtor.styles, styles);
 
-    if (!this._eventsInitialized) {
-      this._eventsInitialized = true;
-      this.events();
+      if (!this._eventsInitialized) {
+        this._eventsInitialized = true;
+        this.events();
+      }
+    } finally {
+      EllementRuntime.end();
     }
   }
 

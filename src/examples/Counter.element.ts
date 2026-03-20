@@ -1,11 +1,14 @@
 import { css, html } from "../template";
 import EllementComponent from "../core/EllementComponent";
+import { state } from "../hooks/state";
+
+type CounterState = {
+  count: number;
+  color: "black" | "white";
+};
 
 export default class CounterElement extends EllementComponent {
-  counterState = this.state({
-    count: 0,
-    color: "black",
-  });
+  private counterState!: ReturnType<typeof state<CounterState>>
 
   static styles = css`
     :host {
@@ -36,21 +39,21 @@ export default class CounterElement extends EllementComponent {
   `;
 
   render() {
+    this.counterState = state<CounterState>({
+      count: 0,
+      color: "black",
+    });
+
     return {
       styles: css`
         :host {
-          background: ${this.counterState.value.color === "black"
-            ? "black"
-            : "white"};
-          color: ${this.counterState.value.color === "black"
-            ? "white"
-            : "black"};
+          background: ${this.counterState.value.color === "black" ? "black" : "white"};
+          color: ${this.counterState.value.color === "black" ? "white" : "black"};
         }
       `,
       html: html`
         <button id="color">
-          Change color to
-          ${this.counterState.value.color === "black" ? "white" : "black"}
+          Change color to ${this.counterState.value.color === "black" ? "white" : "black"}
         </button>
         <button id="dec">-</button>
         <span>${this.counterState.value.count}</span>
@@ -61,18 +64,18 @@ export default class CounterElement extends EllementComponent {
 
   events() {
     this.on("click", "#color", () => {
-      this.counterState.setState((v) => ({
+      this.counterState.set((v) => ({
         ...v,
         color: v.color === "black" ? "white" : "black",
       }));
     });
 
     this.on("click", "#inc", () => {
-      this.counterState.setState((v) => ({ ...v, count: v.count + 1 }));
+      this.counterState.set((v) => ({ ...v, count: v.count + 1 }));
     });
 
     this.on("click", "#dec", () => {
-      this.counterState.setState((v) => ({ ...v, count: v.count - 1 }));
+      this.counterState.set((v) => ({ ...v, count: v.count - 1 }));
     });
   }
 }
